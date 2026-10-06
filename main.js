@@ -22,9 +22,6 @@ function startGlyphs(canvas, reduce) {
   // Text block = union of the hero text elements, in canvas coordinates.
   // The ellipse circumscribes the padded block, so its corners are clear too.
   function measure() {
-    // While the scramble runs, the headline is one unwrapped line. Keep the last
-    // measured block until the two-line markup is back.
-    if (box && !hero.querySelector('.l1')) return;
     var cr = canvas.getBoundingClientRect();
     var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     hero.querySelectorAll(TEXT_SEL).forEach(function (el) {
@@ -135,37 +132,12 @@ function startGlyphs(canvas, reduce) {
   size();
   if (reduce) { draw(performance.now()); } else { tick(); }
   window.addEventListener('resize', onResize);
-  window.addEventListener('hero-text-ready', onResize);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { size(); draw(performance.now()); });
   return function stop() { clearTimeout(timer); cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
 }
-function scrambleText(full, onFrame, done) {
-  var CH = 'ABCDEF0123456789#$%&*+=<>/\\|{}[]';
-  var start = performance.now(), dur = 1100, id = null;
-  function step(now) {
-    var p = Math.min(1, (now - start) / dur), n = Math.floor(full.length * p), out = '';
-    for (var i = 0; i < full.length; i++) {
-      var ch = full.charAt(i);
-      out += (i < n || ch === ' ') ? ch : CH.charAt(Math.floor(Math.random() * CH.length));
-    }
-    onFrame(out);
-    if (p < 1) id = requestAnimationFrame(step); else if (done) done();
-  }
-  id = requestAnimationFrame(step);
-  return function () { cancelAnimationFrame(id); };
-}
-
 (function () {
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   startGlyphs(document.getElementById('glyphs'), reduce);
-  if (!reduce) {
-    var h = document.getElementById('headline');
-    // Done callback restores the two-line accent once the scramble finishes.
-    scrambleText('Find the access that shouldn’t exist.', function (s) { h.textContent = s; }, function () {
-      h.innerHTML = '<span class="l1">Find the access</span> <span class="l2">that shouldn’t exist.</span>';
-      window.dispatchEvent(new Event('hero-text-ready'));
-    });
-  }
 })();
 
 /* Tabs: roving tabindex, arrow keys, 6s auto-advance, pause on hover or focus */
