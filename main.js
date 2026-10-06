@@ -2,15 +2,65 @@
 function startGlyphs(canvas, reduce) {
   var ctx = canvas.getContext('2d');
   var CH = 'ABCDEF0123456789#$%&*+=<>/\\|{}[]:;~^xz';
-  var CW = 9.6, LH = 21, W = 0, H = 0, cols = 0, rows = 0, grid = [], shade = [], timer = null, t0 = performance.now();
-  var defs = [
-    { t: 'L001  95  snakamura   terminated 47d, okta active', r: 0.20, c: 0.50 },
-    { t: 'N002  90  svc-legacy-reporting   owner left', r: 0.40, c: 0.58 },
-    { t: 'L001  89  ttanaka   github sign-in 1d ago', r: 0.62, c: 0.52 },
-    { t: 'P008  87  znakamura   okta admin, idle 131d', r: 0.82, c: 0.60 }
+  var CW = 9.6, LH = 21, PAD = 40, MARGIN = 16, MOBILE_BREAK = 900;
+  var W = 0, H = 0, cols = 0, rows = 0, grid = [], shade = [], timer = null, t0 = performance.now();
+  var hero = canvas.parentElement;
+  var TEXT_SEL = '.eyebrow, .hero-title, .hero-sub, .hero-actions';
+  // Two findings per side zone, at different heights. Each line is one row of text.
+  var FINDINGS = [
+    { lines: ['L001  95  snakamura', 'okta still active'], side: 'left', at: 0.12 },
+    { lines: ['N002  90', 'svc-legacy-reporting', 'owner left'], side: 'right', at: 0.34 },
+    { lines: ['L001  89  ttanaka', 'github 1d ago'], side: 'left', at: 0.74 },
+    { lines: ['P008  87  znakamura', 'idle 131d, admin'], side: 'right', at: 0.92 }
   ];
+  var box = null;   // text block in canvas coordinates
+  var ell = null;   // mask ellipse
+  var dim = 1;      // overall glyph strength (dimmed below MOBILE_BREAK)
   var toks = [];
   function rc() { return CH.charAt(Math.floor(Math.random() * CH.length)); }
+
+  // Text block = union of the hero text elements, in canvas coordinates.
+  // The ellipse circumscribes the padded block, so its corners are clear too.
+  function measure() {
+    // While the scramble runs, the headline is one unwrapped line. Keep the last
+    // measured block until the two-line markup is back.
+    if (box && !hero.querySelector('.l1')) return;
+    var cr = canvas.getBoundingClientRect();
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    hero.querySelectorAll(TEXT_SEL).forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) return;
+      x0 = Math.min(x0, r.left - cr.left); y0 = Math.min(y0, r.top - cr.top);
+      x1 = Math.max(x1, r.right - cr.left); y1 = Math.max(y1, r.bottom - cr.top);
+    });
+    box = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    ell = {
+      cx: box.x + box.w / 2,
+      cy: box.y + box.h / 2,
+      rx: (box.w / 2) * Math.SQRT2 + PAD,
+      ry: (box.h / 2) * Math.SQRT2 + PAD
+    };
+  }
+
+  // Findings go in the side zones outside the padded text block.
+  // A finding that does not fit fully in its zone is skipped.
+  function layoutFindings() {
+    toks = [];
+    if (W < MOBILE_BREAK) return;
+    var leftW = box.x - PAD - MARGIN;
+    var rightX = box.x + box.w + PAD + MARGIN;
+    var rightW = W - rightX - MARGIN;
+    FINDINGS.forEach(function (f) {
+      var maxLen = 0, total = 0;
+      f.lines.forEach(function (l) { maxLen = Math.max(maxLen, l.length); total += l.length; });
+      var pxW = maxLen * CW + 12, pxH = f.lines.length * LH;
+      if (pxW > (f.side === 'left' ? leftW : rightW)) return;
+      var x = f.side === 'left' ? MARGIN : rightX;
+      var y = Math.min(Math.max(box.y + f.at * box.h - pxH / 2, 0), H - pxH);
+      toks.push({ lines: f.lines, total: total, c: Math.floor(x / CW), r: Math.floor(y / LH) });
+    });
+  }
+
   function size() {
     var r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
     W = r.width; H = r.height;
@@ -18,14 +68,21 @@ function startGlyphs(canvas, reduce) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cols = Math.ceil(W / CW); rows = Math.ceil(H / LH); grid = []; shade = [];
     for (var i = 0; i < cols * rows; i++) { grid.push(rc()); shade.push(Math.random()); }
-    toks = [];
-    defs.forEach(function (d) {
-      var len = d.t.length; if (len + 2 > cols) return;
-      var c = Math.min(Math.floor(d.c * cols), cols - len - 1), r = Math.min(rows - 1, Math.floor(d.r * rows));
-      toks.push({ t: d.t, r: r, c: c });
-    });
+    dim = W < MOBILE_BREAK ? 0.35 : 1;
+    measure();
+    layoutFindings();
   }
-  function fade(x) { var a = (x / W - 0.18) / 0.4; return a < 0 ? 0 : a > 1 ? 1 : a * a * (3 - 2 * a); }
+
+  // 0 inside the ellipse (text area stays clear), 1 outside it, smooth ramp between.
+  function maskAt(px, py) {
+    var dx = (px - ell.cx) / ell.rx, dy = (py - ell.cy) / ell.ry;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    if (d <= 1) return 0;
+    if (d >= 1.3) return 1;
+    var t = (d - 1) / 0.3;
+    return t * t * (3 - 2 * t);
+  }
+
   function draw(now) {
     ctx.clearRect(0, 0, W, H);
     ctx.font = "13px 'Geist Mono', ui-monospace, monospace"; ctx.textBaseline = 'top';
@@ -33,32 +90,38 @@ function startGlyphs(canvas, reduce) {
     var states = toks.map(function (k, i) {
       var p = reduce ? 1.5 : ((el + i * 1.9) % 7.6);
       var shown = 0, on = false;
-      if (reduce) { shown = k.t.length; on = true; }
-      else if (p < 0.9) { shown = Math.floor(k.t.length * (p / 0.9)); on = true; }
-      else if (p < 4.6) { shown = k.t.length; on = true; }
-      else if (p < 5.2) { shown = Math.floor(k.t.length * (1 - (p - 4.6) / 0.6)); on = true; }
-      if (on) for (var j = 0; j < k.t.length; j++) cover[k.r * cols + k.c + j] = 1;
+      if (reduce) { shown = k.total; on = true; }
+      else if (p < 0.9) { shown = Math.floor(k.total * (p / 0.9)); on = true; }
+      else if (p < 4.6) { shown = k.total; on = true; }
+      else if (p < 5.2) { shown = Math.floor(k.total * (1 - (p - 4.6) / 0.6)); on = true; }
+      if (on) k.lines.forEach(function (line, li) {
+        for (var j = 0; j < line.length; j++) cover[(k.r + li) * cols + k.c + j] = 1;
+      });
       return { on: on, shown: shown };
     });
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
         var i = y * cols + x; if (cover[i]) continue;
-        var px = x * CW, a = fade(px + CW / 2) * (0.10 + 0.30 * shade[i]);
+        var m = maskAt(x * CW + CW / 2, y * LH + LH / 2);
+        var a = m * (0.10 + 0.30 * shade[i]) * dim;
         if (a < 0.02) continue;
         ctx.fillStyle = 'rgba(150, 155, 180, ' + a.toFixed(3) + ')';
-        ctx.fillText(grid[i], px, y * LH + 3);
+        ctx.fillText(grid[i], x * CW, y * LH + 3);
       }
     }
     toks.forEach(function (k, i) {
       var s = states[i]; if (!s.on) return;
-      var x0 = k.c * CW, y0 = k.r * LH;
-      ctx.fillStyle = 'rgba(245, 183, 0, 0.10)';
-      ctx.fillRect(x0 - 6, y0, k.t.length * CW + 12, LH);
-      for (var j = 0; j < k.t.length; j++) {
-        var ch = k.t.charAt(j);
-        if (j < s.shown) { ctx.fillStyle = '#F5B700'; ctx.fillText(ch, x0 + j * CW, y0 + 3); }
-        else if (ch !== ' ') { ctx.fillStyle = 'rgba(245, 183, 0, 0.45)'; ctx.fillText(rc(), x0 + j * CW, y0 + 3); }
-      }
+      var g = 0;
+      k.lines.forEach(function (line, li) {
+        var x0 = k.c * CW, y0 = (k.r + li) * LH;
+        ctx.fillStyle = 'rgba(245, 183, 0, 0.10)';
+        ctx.fillRect(x0 - 6, y0, line.length * CW + 12, LH);
+        for (var j = 0; j < line.length; j++, g++) {
+          var ch = line.charAt(j);
+          if (g < s.shown) { ctx.fillStyle = '#F5B700'; ctx.fillText(ch, x0 + j * CW, y0 + 3); }
+          else if (ch !== ' ') { ctx.fillStyle = 'rgba(245, 183, 0, 0.45)'; ctx.fillText(rc(), x0 + j * CW, y0 + 3); }
+        }
+      });
     });
   }
   function tick() {
@@ -72,7 +135,8 @@ function startGlyphs(canvas, reduce) {
   size();
   if (reduce) { draw(performance.now()); } else { tick(); }
   window.addEventListener('resize', onResize);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { draw(performance.now()); });
+  window.addEventListener('hero-text-ready', onResize);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { size(); draw(performance.now()); });
   return function stop() { clearTimeout(timer); cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
 }
 function scrambleText(full, onFrame, done) {
@@ -99,6 +163,7 @@ function scrambleText(full, onFrame, done) {
     // Done callback restores the two-line accent once the scramble finishes.
     scrambleText('Find the access that shouldn’t exist.', function (s) { h.textContent = s; }, function () {
       h.innerHTML = '<span class="l1">Find the access</span> <span class="l2">that shouldn’t exist.</span>';
+      window.dispatchEvent(new Event('hero-text-ready'));
     });
   }
 })();
