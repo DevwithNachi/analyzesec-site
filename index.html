@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AnalyzeSec: find the access that shouldn't exist</title>
+<meta name="description" content="AnalyzeSec ranks the accounts most likely to be wrong across HR, Okta, GitHub and AWS, with the evidence to act on each one.">
+<meta name="theme-color" content="#0B0C12">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='4' fill='%230B0C12'/%3E%3Crect x='8' y='8' width='6' height='6' rx='1' fill='%23F5B700'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="frame">
+
+  <header class="site-header">
+    <a href="#top" class="logo" aria-label="AnalyzeSec home">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="0" y="0" width="6" height="6" rx="1" fill="#F5F5F7"/><rect x="8" y="0" width="6" height="6" rx="1" fill="#F5F5F7"/><rect x="16" y="0" width="6" height="6" rx="1" fill="#F5F5F7"/><rect x="0" y="8" width="6" height="6" rx="1" fill="#F5F5F7"/><rect x="8" y="8" width="6" height="6" rx="1" fill="#F5B700"/><rect x="16" y="8" width="6" height="6" rx="1" fill="#F5F5F7"/><rect x="0" y="16" width="6" height="6" rx="1" fill="#F5F5F7"/><rect x="8" y="16" width="6" height="6" rx="1" fill="#F5F5F7"/><rect x="16" y="16" width="6" height="6" rx="1" fill="#F5F5F7"/></svg>
+      <span>AnalyzeSec</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#how">How it works</a>
+      <a href="#posture">Posture</a>
+      <a href="#ai-agents">AI agents</a>
+      <a href="#principles">Principles</a>
+    </nav>
+    <a href="#access" class="btn btn-light btn-nav">Request early access</a>
+  </header>
+
+  <section id="top" class="hero">
+    <canvas id="glyphs" class="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <p class="eyebrow">[ Identity security posture ]</p>
+      <h1 class="hero-title" aria-label="Find the access that shouldn&#39;t exist.">
+        <span id="headline" aria-hidden="true"><span class="l1">Find the access</span> <span class="l2">that shouldn&#39;t exist.</span></span>
+      </h1>
+      <p class="hero-sub">AnalyzeSec ranks the accounts most likely to be wrong across HR, Okta, GitHub and AWS, with the evidence to act on each one.</p>
+      <div class="hero-actions">
+        <a href="#access" class="btn btn-primary">Request early access</a>
+        <a href="#how" class="btn btn-secondary">See how it works</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="connects" aria-labelledby="connects-title">
+    <h2 id="connects-title" class="visually-hidden">Connectors</h2>
+    <ul class="connects-row">
+      <li class="connects-label">Connectors in development</li>
+      <li>Okta</li>
+      <li>GitHub</li>
+      <li>AWS</li>
+      <li>Workday <span class="sub">via HR file import</span></li>
+      <li>Salesforce</li>
+      <li>Google Workspace</li>
+    </ul>
+  </section>
+
+  <section id="posture" class="section">
+    <p class="section-label">[ Posture ]</p>
+    <h2 class="section-title">Every identity, ranked by<br>what's most likely wrong.</h2>
+    <div class="split split-posture">
+      <div class="visual-panel" data-visual>
+        <div class="tabpanels">
+          <figure class="tabpanel is-active" role="tabpanel" id="posture-panel-0" aria-labelledby="posture-tab-0">
+            <img src="assets/risk-queue.webp" width="1440" height="900" loading="lazy" alt="AnalyzeSec risk queue listing open findings sorted by score, each with its triggering record and a severity label.">
+          </figure>
+          <figure class="tabpanel" role="tabpanel" id="posture-panel-1" aria-labelledby="posture-tab-1">
+            <img src="assets/access-map.webp" width="1440" height="900" loading="lazy" alt="AnalyzeSec access map showing a team expanded to its people and the apps they reach, with unusual grants highlighted.">
+          </figure>
+          <figure class="tabpanel" role="tabpanel" id="posture-panel-2" aria-labelledby="posture-tab-2">
+            <img src="assets/identity-profile.webp" width="1440" height="900" loading="lazy" alt="AnalyzeSec identity profile for a terminated employee whose accounts in Okta, Salesforce and GitHub are still active.">
+          </figure>
+        </div>
+      </div>
+      <div class="tabs" data-tabs>
+        <div class="tablist" role="tablist" aria-label="Posture views">
+          <button class="tab" role="tab" id="posture-tab-0" aria-controls="posture-panel-0" aria-selected="true" tabindex="0">
+            <span class="track" aria-hidden="true"><span class="fill"></span></span>
+            <span class="tab-title"><span class="bullet" aria-hidden="true"></span>Risk queue</span>
+            <span class="tab-desc">Every finding scored 0–100, with the record that triggered it.</span>
+          </button>
+          <button class="tab" role="tab" id="posture-tab-1" aria-controls="posture-panel-1" aria-selected="false" tabindex="-1">
+            <span class="track" aria-hidden="true"><span class="fill"></span></span>
+            <span class="tab-title"><span class="bullet" aria-hidden="true"></span>Access map</span>
+            <span class="tab-desc">Teams, people and apps on one map, with unusual access highlighted.</span>
+          </button>
+          <button class="tab" role="tab" id="posture-tab-2" aria-controls="posture-panel-2" aria-selected="false" tabindex="-1">
+            <span class="track" aria-hidden="true"><span class="fill"></span></span>
+            <span class="tab-title"><span class="bullet" aria-hidden="true"></span>Identity profile</span>
+            <span class="tab-desc">Everything one person can reach, across every system, on one page.</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ai-agents" class="section">
+    <p class="section-label">[ AI agents ]</p>
+    <h2 class="section-title">Know which AI agents can reach your data,<br>and who approved it.</h2>
+    <p class="badge-row"><span class="badge">In development</span></p>
+    <div class="split split-ai">
+      <div class="visual-panel visual-mock" data-visual>
+        <div class="tabpanels">
+
+          <div class="tabpanel is-active" role="tabpanel" id="ai-panel-0" aria-labelledby="ai-tab-0">
+            <figure class="mock-card" aria-label="Mockup: AI agent inventory">
+              <div class="mock-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="mock-title">AI agents / Inventory</span></div>
+              <div class="table-scroll">
+                <table class="mock-table">
+                  <caption class="visually-hidden">Five AI agents with owner, access and status. This is a design mockup.</caption>
+                  <thead><tr><th scope="col">Agent</th><th scope="col">Owner</th><th scope="col">Access</th><th scope="col">Status</th></tr></thead>
+                  <tbody>
+                    <tr><td>Chat assistant (Drive connector)</td><td>Former employee</td><td>Read all of Drive</td><td><span class="chip chip-critical">Critical</span></td></tr>
+                    <tr><td>Meeting note-taker</td><td>None</td><td>Calendar, Drive</td><td><span class="chip chip-high">High</span></td></tr>
+                    <tr><td>Support bot</td><td>Support team</td><td>Salesforce cases, read</td><td><span class="chip chip-clean">Clean</span></td></tr>
+                    <tr><td>Code review agent</td><td>Platform lead</td><td>GitHub, write</td><td><span class="chip chip-high">High</span></td></tr>
+                    <tr><td>Release notes agent</td><td>Engineer (personal access token)</td><td>GitHub, read</td><td><span class="chip chip-high">High</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </figure>
+          </div>
+
+          <div class="tabpanel" role="tabpanel" id="ai-panel-1" aria-labelledby="ai-tab-1">
+            <figure class="mock-card" aria-label="Mockup: code review agent, intended versus actual access">
+              <div class="mock-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="mock-title">Code review agent / Intended vs. actual</span></div>
+              <div class="compare">
+                <div class="compare-col">
+                  <p class="compare-head">Approved policy</p>
+                  <ul class="grant-list">
+                    <li><span class="grant-sys">GitHub</span><span class="grant-scope">read repos</span></li>
+                  </ul>
+                </div>
+                <div class="compare-col">
+                  <p class="compare-head">Actual grants</p>
+                  <ul class="grant-list">
+                    <li><span class="grant-sys">GitHub</span><span class="grant-scope">read repos</span></li>
+                    <li class="grant-drift"><span class="grant-sys">GitHub</span><span class="grant-scope">write repos</span><span class="chip chip-drift">Drift</span></li>
+                  </ul>
+                </div>
+              </div>
+            </figure>
+          </div>
+
+          <div class="tabpanel" role="tabpanel" id="ai-panel-2" aria-labelledby="ai-tab-2">
+            <figure class="mock-card" aria-label="Mockup: policy review for an AI agent">
+              <div class="mock-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="mock-title">Policy review / Support bot</span></div>
+              <div class="policy-body">
+                <p class="policy-label">Describe the access in plain language</p>
+                <div class="policy-input">Read the Support folder and Salesforce cases. Never touch Finance. Ask me before updating a case.</div>
+                <p class="policy-label">Structured rules it became</p>
+                <ul class="rules">
+                  <li><span class="rule-effect rule-allow">allow</span> read <code>Support/**</code></li>
+                  <li><span class="rule-effect rule-allow">allow</span> read <code>Case</code></li>
+                  <li><span class="rule-effect rule-deny">deny</span> all <code>Finance/**</code></li>
+                  <li><span class="rule-effect rule-approve">require approval</span> write <code>Case</code></li>
+                </ul>
+                <button type="button" class="btn btn-primary btn-mock" tabindex="-1">Approve policy</button>
+              </div>
+            </figure>
+          </div>
+
+        </div>
+      </div>
+      <div class="tabs" data-tabs>
+        <div class="tablist" role="tablist" aria-label="AI agent views">
+          <button class="tab" role="tab" id="ai-tab-0" aria-controls="ai-panel-0" aria-selected="true" tabindex="0">
+            <span class="track" aria-hidden="true"><span class="fill"></span></span>
+            <span class="tab-title"><span class="bullet" aria-hidden="true"></span>Agent inventory</span>
+            <span class="tab-desc">Every AI app and agent connected to company systems, with an accountable owner.</span>
+          </button>
+          <button class="tab" role="tab" id="ai-tab-1" aria-controls="ai-panel-1" aria-selected="false" tabindex="-1">
+            <span class="track" aria-hidden="true"><span class="fill"></span></span>
+            <span class="tab-title"><span class="bullet" aria-hidden="true"></span>Intended vs. actual</span>
+            <span class="tab-desc">What an agent was approved to do, next to what it can do today.</span>
+          </button>
+          <button class="tab" role="tab" id="ai-tab-2" aria-controls="ai-panel-2" aria-selected="false" tabindex="-1">
+            <span class="track" aria-hidden="true"><span class="fill"></span></span>
+            <span class="tab-title"><span class="bullet" aria-hidden="true"></span>Policy review</span>
+            <span class="tab-desc">Describe an agent's access in plain language, review the exact rules, then approve.</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="section">
+    <p class="section-label">[ How it works ]</p>
+    <h2 class="section-title">One picture of every identity,<br>built from the systems you already run.</h2>
+    <p class="section-lede">No single system can tell you that HR ended someone's employment while Salesforce still lets them in. AnalyzeSec can, because it reads all of them.</p>
+    <ol class="stages">
+      <li><span class="stage-n">1</span><h3>Collect</h3><p>Reads accounts, roles, MFA and sign-ins from HR, Okta, GitHub, AWS and Salesforce.</p></li>
+      <li><span class="stage-n">2</span><h3>Match</h3><p>Joins every account to one person. Accounts that match no one are flagged as orphans.</p></li>
+      <li><span class="stage-n">3</span><h3>Detect</h3><p>Runs rules for offboarding gaps, weak MFA, dormant admins, unusual access and service accounts.</p></li>
+      <li><span class="stage-n">4</span><h3>Rank</h3><p>Scores each finding from 0 to 100 by privilege, system and evidence, so the worst comes first.</p></li>
+      <li><span class="stage-n">5</span><h3>Act</h3><p>You fix it, assign it, accept it with a reason, or snooze it. The next sync confirms the change.</p></li>
+    </ol>
+  </section>
+
+  <section id="findings" class="section">
+    <p class="section-label">[ What it finds ]</p>
+    <h2 class="section-title">Every finding comes with its evidence.</h2>
+    <p class="section-lede">A score tells you where to look. The evidence tells you what to do. Each finding shows exactly which record triggered it.</p>
+    <div class="table-scroll table-box">
+      <table class="findings">
+        <thead>
+          <tr><th scope="col">Rule</th><th scope="col">Finding</th><th scope="col">Example evidence</th><th scope="col">Severity</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="rule-id">L001</td><td class="finding-name">Active after termination</td><td>HR ended employment on Aug 16. Okta, Salesforce and Workday accounts are still active.</td><td><span class="sev sev-critical">Critical</span></td></tr>
+          <tr><td class="rule-id">P008</td><td class="finding-name">Dormant privileged account</td><td>Okta admin rights. Last sign-in 131 days ago.</td><td><span class="sev sev-critical">Critical</span></td></tr>
+          <tr><td class="rule-id">A003</td><td class="finding-name">Admin without strong MFA</td><td>Salesforce admin enrolled in SMS codes only.</td><td><span class="sev sev-high">High</span></td></tr>
+          <tr><td class="rule-id">P002</td><td class="finding-name">Access beyond peers</td><td>The only one of 24 engineers with elevated rights in AWS and GitHub.</td><td><span class="sev sev-medium">Medium</span></td></tr>
+          <tr><td class="rule-id">N002</td><td class="finding-name">Service account owner left</td><td>Owned by an engineer who left in July. Key last used this morning.</td><td><span class="sev sev-critical">Critical</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="split split-compare">
+      <div class="compare-copy">
+        <h2 class="section-title section-title-left">HR says gone.<br>Okta says active.</h2>
+        <p class="section-lede section-lede-left">Most tools look at one system at a time. AnalyzeSec treats your HR system as the source of truth and checks every account against it, so a contradiction surfaces on its own instead of waiting for the next access review.</p>
+      </div>
+      <div class="record-grid">
+        <div class="record">
+          <span class="record-src">Workday</span>
+          <span class="record-name">Sam Nakamura</span>
+          <dl><dt>Status</dt><dd>Terminated</dd><dt>Last day</dt><dd class="mono">2026-08-16</dd><dt>Department</dt><dd>Sales</dd></dl>
+        </div>
+        <div class="record record-flag">
+          <span class="record-src">Okta</span>
+          <span class="record-name">snakamura</span>
+          <dl><dt>Status</dt><dd>Active</dd><dt>Last sign-in</dt><dd class="mono">4 days ago</dd><dt>Role</dt><dd>Group admin</dd></dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="principles" class="section">
+    <p class="section-label">[ Principles ]</p>
+    <h2 class="section-title">A security tool should hold itself<br>to its own rules.</h2>
+    <div class="principles">
+      <div class="principle">
+        <h3>Read-only by default</h3>
+        <p>AnalyzeSec reads and recommends. Changing access in your systems will be opt-in, per connector, and always your click.</p>
+      </div>
+      <div class="principle">
+        <h3>Least privilege, including ours</h3>
+        <p>It never asks for broader permissions than its own rules would allow any other app to hold.</p>
+      </div>
+      <div class="principle">
+        <h3>Every number traces to a record</h3>
+        <p>Click any count on the dashboard and you see the accounts behind it. No figure appears without its source.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="access" class="section">
+    <div class="access-card">
+      <div class="access-copy">
+        <h2 class="section-title section-title-left">Running identity for 200 to 5,000 people?</h2>
+        <p class="section-lede section-lede-left">AnalyzeSec is in early access. Connectors for Okta, GitHub, an HR file import and AWS IAM are in development. Tell us about your stack and we'll be in touch.</p>
+      </div>
+      <form class="access-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <label for="email">Work email</label>
+        <div class="form-row">
+          <input id="email" name="email" type="email" required placeholder="you@company.com" autocomplete="email">
+          <button type="submit" class="btn btn-primary">Request early access</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <span>AnalyzeSec, Boston</span>
+    <span>&copy; 2026 AnalyzeSec</span>
+  </footer>
+
+</div>
+<script src="main.js"></script>
+</body>
+</html>
