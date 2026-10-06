@@ -364,3 +364,20 @@ section, footer { border-top: 1px solid var(--line); }
   html { scroll-behavior: auto; }
   .tabpanel, .tab { transition: none; }
 }
+
+/* Below 900px: stacked AI inventory, content-sized product panels */
+.mock-stack { display: none; list-style: none; margin: 0; padding: 0; }
+.stack-row { padding: 14px 16px; border-bottom: 1px solid #F0F0F3; display: flex; flex-direction: column; gap: 8px; color: #1D1D1F; }
+.stack-row:last-child { border-bottom: 0; }
+.stack-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.stack-name { font-size: 14px; font-weight: 500; }
+.stack-row dl { margin: 0; display: grid; grid-template-columns: 64px 1fr; gap: 4px 12px; font-size: 13px; }
+.stack-row dt { color: #6E6E73; }
+.stack-row dd { margin: 0; color: #1D1D1F; }
+@media (max-width: 900px) {
+  .tabpanels { position: relative; }
+  .tabpanel { grid-area: auto; position: absolute; top: 0; left: 0; right: 0; }
+  .tabpanel.is-active { position: relative; }
+  .table-scroll { display: none; }
+  .mock-stack { display: block; }
+}

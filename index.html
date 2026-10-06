@@ -129,19 +129,19 @@
         <div class="tabpanels">
           <figure class="tabpanel is-active" role="tabpanel" id="posture-panel-0" aria-labelledby="posture-tab-0">
             <picture>
-              <source media="(max-width: 600px)" srcset="assets/risk-queue-mobile.webp">
+              <source media="(max-width: 900px)" srcset="assets/risk-queue-mobile.webp">
               <img src="assets/risk-queue.webp" width="1440" height="900" loading="lazy" alt="AnalyzeSec risk queue listing open findings sorted by score, each with its triggering record and a severity label.">
             </picture>
           </figure>
           <figure class="tabpanel" role="tabpanel" id="posture-panel-1" aria-labelledby="posture-tab-1">
             <picture>
-              <source media="(max-width: 600px)" srcset="assets/access-map-mobile.webp">
+              <source media="(max-width: 900px)" srcset="assets/access-map-mobile.webp">
               <img src="assets/access-map.webp" width="1440" height="900" loading="lazy" alt="AnalyzeSec access map showing a team expanded to its people and the apps they reach, with unusual grants highlighted.">
             </picture>
           </figure>
           <figure class="tabpanel" role="tabpanel" id="posture-panel-2" aria-labelledby="posture-tab-2">
             <picture>
-              <source media="(max-width: 600px)" srcset="assets/identity-profile-mobile.webp">
+              <source media="(max-width: 900px)" srcset="assets/identity-profile-mobile.webp">
               <img src="assets/identity-profile.webp" width="1440" height="900" loading="lazy" alt="AnalyzeSec identity profile for a terminated employee whose accounts in Okta, Salesforce and GitHub are still active.">
             </picture>
           </figure>
@@ -193,6 +193,13 @@
                   </tbody>
                 </table>
               </div>
+              <ul class="mock-stack" aria-label="AI agents, stacked">
+              <li class="stack-row"><div class="stack-head"><span class="stack-name">Chat assistant (Drive connector)</span><span class="chip chip-critical">Critical</span></div><dl><dt>Owner</dt><dd>Former employee</dd><dt>Access</dt><dd>Read all of Drive</dd></dl></li>
+              <li class="stack-row"><div class="stack-head"><span class="stack-name">Meeting note-taker</span><span class="chip chip-high">High</span></div><dl><dt>Owner</dt><dd>None</dd><dt>Access</dt><dd>Calendar, Drive</dd></dl></li>
+              <li class="stack-row"><div class="stack-head"><span class="stack-name">Support bot</span><span class="chip chip-clean">Clean</span></div><dl><dt>Owner</dt><dd>Support team</dd><dt>Access</dt><dd>Salesforce cases, read</dd></dl></li>
+              <li class="stack-row"><div class="stack-head"><span class="stack-name">Code review agent</span><span class="chip chip-high">High</span></div><dl><dt>Owner</dt><dd>Platform lead</dd><dt>Access</dt><dd>GitHub, write</dd></dl></li>
+              <li class="stack-row"><div class="stack-head"><span class="stack-name">Release notes agent</span><span class="chip chip-high">High</span></div><dl><dt>Owner</dt><dd>Engineer (personal access token)</dd><dt>Access</dt><dd>GitHub, read</dd></dl></li>
+              </ul>
             </figure>
           </div>
 
