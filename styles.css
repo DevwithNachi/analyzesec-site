@@ -158,11 +158,16 @@ section, footer { border-top: 1px solid var(--line); }
   text-align: center;
 }
 .conn-name {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 10px; min-height: 32px;
   font-family: var(--sans); font-size: 19px; font-weight: 600; letter-spacing: -0.02em;
   color: #9DA0AE; white-space: nowrap;
 }
-.conn-mark { display: block; flex: 0 0 auto; color: var(--text); }
+.conn-logo { display: block; width: auto; flex: 0 0 auto; }
+.conn-disclaimer {
+  margin: 0; padding: 18px 32px; text-align: center;
+  font-size: 13px; line-height: 1.5; color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
 .conn-status {
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
   text-transform: uppercase; color: var(--muted);
