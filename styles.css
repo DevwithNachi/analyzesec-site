@@ -144,7 +144,6 @@ section, footer { border-top: 1px solid var(--line); }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
           mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-.conn-viewport:hover .conn-track,
 .conn-viewport:focus-within .conn-track { animation-play-state: paused; }
 .conn-track {
   list-style: none; margin: 0; padding: 0; flex: 0 0 auto;

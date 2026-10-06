@@ -17,15 +17,24 @@
     opts = opts || {};
     var hero = opts.hero || canvas.parentElement;
     var content = opts.content || null;
-    var showFindings = opts.findings !== false;
+    var showFindings = opts.findings === true;   // off unless asked for
+    // All the dials in one place. Any can be overridden through opts.
+    var CFG = {
+      fontSize: opts.fontSize || 10,         // px
+      idleOpacity: opts.idleOpacity != null ? opts.idleOpacity : 0.40,   // resting glyphs
+      ambientPeak: opts.ambientPeak != null ? opts.ambientPeak : 0.80,   // white trails at their brightest
+      cursorPeak: opts.cursorPeak != null ? opts.cursorPeak : 1.0,       // purple cursor trail
+      maxWalkers: opts.maxWalkers || 10,
+      spawnMin: 150, spawnMax: 450           // ms between new trails
+    };
     var ctx = canvas.getContext('2d');
 
     // Light to dense. Characters are picked by a smooth field value.
     var RAMP = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
     var NOISE = '!@#$%&*+=<>/\\|{}[]:;~^?';
-    var CW = 14, LH = 20;
-    var FONT = "12px 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
-    var TRAIL_MS = 900, TRAIL_R = 64;
+    var CW = Math.round(CFG.fontSize * 1.15), LH = Math.round(CFG.fontSize * 1.6);
+    var FONT = CFG.fontSize + "px 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+    var TRAIL_MS = 900, TRAIL_R = 56;
 
     var reduce = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var W = 0, H = 0, cols = 0, rows = 0;
@@ -38,7 +47,7 @@
     var scramble = null;         // per-cell scrambled char while under the trail
     var slots = [];              // placed findings
     var raf = 0, last = 0, nextWalker = 0, visible = true, t0 = performance.now();
-    var AMB_MS = 1700, AMB_R = 56;
+    var AMB_MS = 1500, AMB_R = 40;
     var styleCache = {};
 
     var FINDINGS = [
@@ -67,7 +76,7 @@
       if (!hole) return 1;
       var dx = (px - hole.cx) / hole.rx, dy = (py - hole.cy) / hole.ry;
       var d = Math.sqrt(dx * dx + dy * dy);
-      return 0.3 + 0.7 * smooth(0.8, 1.2, d);   // faint behind the text, full outside
+      return 0.15 + 0.85 * smooth(0.8, 1.25, d);   // very faint behind the text, full outside
     }
     function inHole(px, py) {
       if (!hole) return false;
@@ -129,10 +138,10 @@
         walkers.push({
           x: x, y: y,
           a: Math.random() * Math.PI * 2,
-          turn: (Math.random() - 0.5) * 2.2,       // preferred curl, radians per second
-          spd: 110 + Math.random() * 150,          // px per second
-          born: now, life: 1400 + Math.random() * 2200,
-          tint: Math.random() < 0.35 ? 1 : 0,      // 1 = indigo, 0 = white
+          turn: (Math.random() - 0.5) * 4,         // preferred curl, radians per second
+          spd: 70 + Math.random() * 230,           // px per second
+          born: now, life: 800 + Math.random() * 3200,
+          tint: 0,                                 // ambient trails are always white
           lastT: now
         });
         return;
@@ -142,8 +151,12 @@
     function stepWalkers(now) {
       walkers = walkers.filter(function (w) {
         var dt = Math.min(0.05, (now - w.lastT) / 1000); w.lastT = now;
-        w.turn += (Math.random() - 0.5) * 3 * dt;               // drift the curl
-        w.a += w.turn * dt + (Math.random() - 0.5) * 0.35;      // wander
+        w.turn += (Math.random() - 0.5) * 8 * dt;               // drift the curl
+        if (w.turn > 4) w.turn = 4; if (w.turn < -4) w.turn = -4;
+        w.a += w.turn * dt + (Math.random() - 0.5) * 0.9;       // wander
+        if (Math.random() < 0.04) w.a += (Math.random() < 0.5 ? -1 : 1) * (0.9 + Math.random() * 1.2); // sudden turn
+        w.spd *= 0.9 + Math.random() * 0.2;                     // speed jitter
+        if (w.spd < 60) w.spd = 60; if (w.spd > 320) w.spd = 320;
         // steer away from the text block
         if (hole) {
           var dx = (w.x - hole.cx) / hole.rx, dy = (w.y - hole.cy) / hole.ry;
@@ -216,7 +229,7 @@
           var v = field(col, row, t);
           var ch = RAMP.charAt(Math.floor(v * (RAMP.length - 1)));
           var hf = holeFactor(px + CW / 2, py + LH / 2);
-          var base = (0.05 + 0.17 * v) * vfade * hf;
+          var base = CFG.idleOpacity * (0.75 + 0.25 * v) * vfade * hf;
 
           var tb = trailBoost[idx];
           var ab = ambBoost[idx] * Math.max(hf, 0.5);
@@ -225,13 +238,13 @@
               if (!scramble[idx] || Math.random() < 0.25) scramble[idx] = NOISE.charAt(Math.floor(Math.random() * NOISE.length));
               ch = scramble[idx];
             }
-            ctx.fillStyle = rgba(154, 155, 250, base + tb * 0.95 * Math.max(hf, 0.6));
+            ctx.fillStyle = rgba(154, 155, 250, Math.max(base, tb * CFG.cursorPeak * Math.max(hf, 0.6)));
           } else if (ab > 0.04) {
             if (ab > 0.4) {
               if (!scramble[idx] || Math.random() < 0.2) scramble[idx] = NOISE.charAt(Math.floor(Math.random() * NOISE.length));
               ch = scramble[idx];
             } else if (ch === ' ') ch = RAMP.charAt(20 + (idx % 30));
-            ctx.fillStyle = ambTint[idx] ? rgba(154, 155, 250, base + ab * 0.95) : rgba(240, 241, 250, base + ab * 0.9);
+            ctx.fillStyle = rgba(245, 245, 247, Math.max(base, ab * CFG.ambientPeak));
           } else {
             if (ch === ' ' || base < 0.015) continue;
             ctx.fillStyle = rgba(160, 164, 188, base);
@@ -259,7 +272,7 @@
       if (!visible || document.hidden) return;
       if (now - last < 33) return;            // ~30 fps is plenty for this
       last = now;
-      if (now > nextWalker && walkers.length < 6) { spawnWalker(now); nextWalker = now + 300 + Math.random() * 600; }
+      if (now > nextWalker && walkers.length < CFG.maxWalkers) { spawnWalker(now); nextWalker = now + CFG.spawnMin + Math.random() * (CFG.spawnMax - CFG.spawnMin); }
       stepWalkers(now);
       draw(now);
     }
